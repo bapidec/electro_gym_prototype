@@ -1,0 +1,22 @@
+name: electro_gym_prototype
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.2.1 <4.0.0'
+
+dependencies:
+  animated_flip_counter: ^0.2.6
+  barcode_widget: ^2.0.4
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
