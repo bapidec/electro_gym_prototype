@@ -222,18 +222,18 @@ class MyHomePageState extends State<MyHomePage> {
 
   showAlertDialog(BuildContext context, int cost) {
     Widget cancelButton = TextButton(
-      child: Text("Nie"),
+      child: const Text("Nie"),
       onPressed:  () => Navigator.of(context).pop(),
     );
     Widget continueButton = TextButton(
-      child: Text("Tak"),
+      child: const Text("Tak"),
       onPressed:  () {
         Navigator.of(context).pop();
         _buyItem(cost: cost);
       }
     );
     AlertDialog alert = AlertDialog(
-      title: Text("Potwierdzenie"),
+      title: const Text("Potwierdzenie"),
       content: Text("Czy na pewno chcesz wykorzystać $cost punktów?"),
       actions: [
         cancelButton,
