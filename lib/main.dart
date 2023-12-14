@@ -9,6 +9,7 @@ const Color minunBlue = Color(0xff0dd4ff);
 const Color minunBlueDark = Color.fromARGB(255, 7, 132, 160);
 const Color minunYellow = Color(0xfff5f6b5);
 const Color minunYellowDark = Color.fromARGB(255, 186, 187, 137);
+const Color plusleRed = Color(0xffE74A45);
 
 void main() {
   runApp(const MyApp());
@@ -42,12 +43,13 @@ class MyHomePageState extends State<MyHomePage> {
   double _power = 500.0;
   int _totalPointsPrevious = 0, _totalPointsCurrent  = 0, _points = 0;
   Random random = Random();
+  late Timer timer;
 
   @override
   void initState() {
     super.initState();
 
-    Timer.periodic(const Duration(seconds: 2), (Timer timer) {
+    timer = Timer.periodic(const Duration(seconds: 2), (Timer timer) {
       setState(() {
         _power += (random.nextDouble() * 16.0) + 1.0;
         _totalPointsCurrent = _power ~/ 10;
@@ -64,7 +66,14 @@ class MyHomePageState extends State<MyHomePage> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          leading: const Icon(Icons.qr_code_scanner_sharp, color: minunBlueDark,),
+          leading: IconButton(icon: const Icon(Icons.qr_code_scanner_sharp, color: minunBlueDark,), onPressed: () => timer = Timer.periodic(const Duration(seconds: 2), (Timer timer) {
+      setState(() {
+        _power += (random.nextDouble() * 16.0) + 1.0;
+        _totalPointsCurrent = _power ~/ 10;
+        _points += _totalPointsCurrent - _totalPointsPrevious;
+        _totalPointsPrevious = _totalPointsCurrent;
+      });
+    }),),
           title: Text(
             "KiloWatGym",
             style: GoogleFonts.getFont('Press Start 2P')
@@ -135,6 +144,19 @@ class MyHomePageState extends State<MyHomePage> {
                     )
                   )
                 ),
+                const SizedBox(height: 48,),
+                ElevatedButton(
+                  onPressed: () => showStopSessionAlertDialog(context),
+                  style: ButtonStyle(
+                    alignment: Alignment.center,
+                    backgroundColor: MaterialStateProperty.all<Color>(plusleRed)
+                  ), 
+                  child: Text("Zakończ", style: GoogleFonts.pressStart2p(
+                    textStyle: const TextStyle(
+                      color: minunYellow,
+                    )
+                  ),),
+                )
               ],
             ),
           );
@@ -191,7 +213,7 @@ class MyHomePageState extends State<MyHomePage> {
             title: Text(title, style: GoogleFonts.getFont('Orbitron'),),
             subtitle: Text('Punkty: $cost', style: GoogleFonts.getFont('Orbitron'),),
             trailing: TextButton(
-              onPressed: _points >= cost ? () => showAlertDialog(context, cost) : null, 
+              onPressed: _points >= cost ? () => showBuyAlertDialog(context, cost) : null, 
               child: Text(
                 'Kup',
                 style: _points >= cost ? 
@@ -220,7 +242,7 @@ class MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  showAlertDialog(BuildContext context, int cost) {
+  showBuyAlertDialog(BuildContext context, int cost) {
     Widget cancelButton = TextButton(
       child: const Text("Nie"),
       onPressed:  () => Navigator.of(context).pop(),
@@ -234,9 +256,70 @@ class MyHomePageState extends State<MyHomePage> {
     );
     AlertDialog alert = AlertDialog(
       title: const Text("Potwierdzenie"),
-      content: Text("Czy na pewno chcesz wykorzystać $cost punktów?"),
+      content: Text("Czy na pewno chcesz wykorzystać $cost punktów?", style: TextStyle(fontSize: 20),),
       actions: [
         cancelButton,
+        continueButton,
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showStopSessionAlertDialog(BuildContext context) {
+    Widget cancelButton = TextButton(
+      child: const Text("Nie"),
+      onPressed:  () => Navigator.of(context).pop(),
+    );
+    Widget continueButton = TextButton(
+      child: const Text("Tak"),
+      onPressed:  () {
+        Navigator.of(context).pop();
+        endSession(context);
+      }
+    );
+    AlertDialog alert = AlertDialog(
+      title: const Text("Potwierdzenie"),
+      content: const Text("Czy na pewno chcesz zakończyć aktualną sesję?", style: TextStyle(fontSize: 20),),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  endSession(BuildContext context) {
+    double generatedPower = _power;
+    setState(() {
+      _power = 0;
+      _totalPointsCurrent = 0;
+      _totalPointsPrevious = 0;
+      timer.cancel();
+    });
+    showGeneratedPowerDialog(context, generatedPower);
+  }
+
+  showGeneratedPowerDialog(BuildContext context, double generatedPower) {
+    Widget continueButton = TextButton(
+      child: const Text("OK"),
+      onPressed:  () {
+        Navigator.of(context).pop();
+      }
+    );
+    AlertDialog alert = AlertDialog(
+      title: const Text("Nieźle!"),
+      content: Text('Wygenerowałeś/aś ${generatedPower.toStringAsFixed(2)} watów!', style: TextStyle(fontSize: 20),),
+      actions: [
         continueButton,
       ],
     );
